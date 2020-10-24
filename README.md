@@ -1,7 +1,7 @@
 Dino API
 Backend API for DINO mobile app.
 
-Built with: TypeScript, Sequelize, GraphQL, Apollo Client, PostGres
+Built with: TypeScript, Sequelize, GraphQL, Apollo Server, PostGres
 
 Features:
 Users can sign in and sign out.
