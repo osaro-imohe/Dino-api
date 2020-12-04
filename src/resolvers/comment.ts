@@ -45,6 +45,7 @@ const commentResolver: IResolvers = {
             order: [["createdAt", "DESC"]],
             limit: 20,
           });
+          break
       }
       return Comment;
     },

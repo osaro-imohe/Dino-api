@@ -51,6 +51,7 @@ const postResolver: IResolvers = {
               order: [["createdAt", "DESC"]],
               limit: 20,
             });
+            break
         }
         console.log(posts.rows)
         return { posts: posts.rows };
