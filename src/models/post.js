@@ -9,7 +9,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Post.belongsTo(models.Group, { foreignKey: "group_id" }),
+      Post.belongsTo(models.User, { foreignKey: "user_id" }),
+        Post.belongsTo(models.Group, { foreignKey: "group_id" }),
         Post.hasMany(models.Comment, { foreignKey: "post_id" });
     }
   }
@@ -18,6 +19,9 @@ module.exports = (sequelize, DataTypes) => {
       message: DataTypes.STRING,
       user_id: DataTypes.INTEGER,
       group_id: DataTypes.INTEGER,
+      number_of_likes: DataTypes.INTEGER,
+      number_of_comments: DataTypes.INTEGER,
+      image_url: DataTypes.STRING,
     },
     {
       sequelize,

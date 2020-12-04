@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         as: "groups",
         foreignKey: "user_id",
       });
+      User.hasMany(models.Post, { foreignKey: "user_id" });
     }
   }
   User.init(
@@ -22,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       last_name: DataTypes.STRING,
       email: DataTypes.STRING,
       password: DataTypes.STRING,
+      profile_picture_url: DataTypes.STRING,
     },
     {
       sequelize,

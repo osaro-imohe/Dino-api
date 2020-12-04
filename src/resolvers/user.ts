@@ -21,7 +21,7 @@ const generateToken = (
 
 const userResolver: IResolvers = {
   Query: {
-    getUser: async (_, { user_id }) => {
+    GetUser: async (_, { user_id }) => {
       const user = await UserModel.findOne({
         where: { id: user_id },
       });
@@ -41,6 +41,7 @@ const userResolver: IResolvers = {
           first_name,
           last_name,
           email,
+          profile_picture_url: "",
           password: await bcrypt.hash(password, 10),
         });
         const token = generateToken(
@@ -50,12 +51,13 @@ const userResolver: IResolvers = {
           user.email
         );
         return {
-          response: "User Created successfully",
           token,
           user_id: user.id,
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.email,
+          profile_picture_url: "",
+          response: "User created successfully",
         };
       } catch (error) {
         throw new Error(error);
@@ -78,16 +80,17 @@ const userResolver: IResolvers = {
         user.email
       );
       const payload = {
-        id: user.id,
+        user_id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email,
-        token: token,
+        profile_picture_url: user.profile_picture_url,
+        token,
+        response: "User authenticated successfully",
       };
       return payload;
     },
     ChangePassword: async (_, { user_id, old_password, new_password }) => {
-      //this is the mutation that fires when an authenticated user wants to reset their password
       const user = await UserModel.findOne({
         where: { id: user_id },
       });

@@ -16,7 +16,6 @@ dotenv.config();
 const groupResolver: IResolvers = {
   Mutation: {
     CreateGroup: async (_, { user_id, name, photo_url }) => {
-      console.log(user_id);
       try {
         const user = await UserModel.findOne({
           where: { id: user_id },
@@ -35,47 +34,68 @@ const groupResolver: IResolvers = {
           user_id,
           group_id: newGroup.id,
         });
-        return {
-          response: "Created Successfully",
-          group_id: newGroup.id,
+        const group = {
+          id: newGroup.id,
+          description: "",
           name: newGroup.name,
           photo_url: newGroup.photo_url,
           invite_code: newGroup.invite_code,
+          admin_user_id: newGroup.admin_user_id,
           number_of_members: newGroup.number_of_members,
+        };
+        return {
+          response: "Created Successfully",
+          groups: group,
         };
       } catch (error) {
         throw new Error("Group could not be created");
       }
     },
-    JoinGroup: async (_, { user_id, group_id }) => {
+    JoinGroup: async (_, { user_id, invite_code }) => {
       const user = await UserModel.findOne({
         where: { id: user_id },
       });
 
+      if (!user) throw new Error("User does not exist");
+
       const group = await GroupModel.findOne({
-        where: { id: group_id },
+        where: { invite_code },
       });
+
+      if (!group) throw new Error("The invite is invalid or has expired");
 
       const isUserInGroup = await UserGroupModel.findOne({
         where: {
           user_id,
-          group_id,
+          group_id: group.id,
         },
       });
 
-      if (!user) throw new Error("User does not exist");
-      if (!group) throw new Error("Group does not exist");
       if (isUserInGroup) throw new Error("User already in group");
 
       try {
         const newUserGroup = await UserGroupModel.create({
           user_id,
-          group_id,
+          group_id: group.id,
         });
+
+        group.number_of_members = group.number_of_members + 1;
+        group.save();
+
+        const joinedGroup = {
+          id: group.id,
+          name: group.name,
+          photo_url: group.photo_url,
+          description: group.description,
+          invite_code: group.invite_code,
+          admin_user_id: group.admin_user_id,
+          number_of_members: group.number_of_members,
+        };
+
+        return { response: "User joined group", groups: joinedGroup };
       } catch (error) {
         throw new Error(error);
       }
-      return "User joined group";
     },
     LeaveGroup: async (_, { user_id, group_id }) => {
       const group = await GroupModel.findOne({
@@ -109,6 +129,30 @@ const groupResolver: IResolvers = {
         userGroups[i].destroy();
       }
       return { response: "Group deleted successfully" };
+    },
+  },
+  Query: {
+    GetGroups: async (_, { user_id }) => {
+      const user = await UserModel.findOne({
+        where: { id: user_id },
+      });
+      if (!user) throw new Error("User does not exist");
+      try {
+        const groups = await user.getGroups({
+          attributes: [
+            "id",
+            "name",
+            "number_of_members",
+            "photo_url",
+            "admin_user_id",
+            "description",
+            "invite_code",
+          ],
+        });
+        return { response: "Groups Found", groups: groups };
+      } catch (error) {
+        throw new Error(error);
+      }
     },
   },
 };
